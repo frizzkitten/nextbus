@@ -7,6 +7,7 @@ const { expect } = chai;
 const {
     get_time_until_bus,
     get_user_input,
+    get_direction_number,
     get_route_number
 } = require("../nextbus");
 
@@ -36,25 +37,58 @@ describe("get_user_input", () => {
         process.argv = prev_process_argv;
     });
 
+    it("should throw an error with an invalid direction", () => {
+        const prev_process_argv = [...process.argv];
+
+        process.argv = [...DEFAULT_ARGV, "route", "stop", "BAD"];
+        expect(get_user_input).to.throw(
+            `Invalid direction. Should be "north" "east" "south" or "west"`
+        );
+
+        // cleanup
+        process.argv = prev_process_argv;
+    });
+
     it("should return three user args if there are three or more args", () => {
         const prev_process_argv = [...process.argv];
 
         // 3 user args
-        process.argv = [...DEFAULT_ARGV, "route", "stop", "direction"];
+        process.argv = [...DEFAULT_ARGV, "route", "stop", "southbound"];
         expect(get_user_input()).to.include.ordered.members([
             "route",
             "stop",
-            "direction"
+            1
         ]);
 
         // 4 user args
         process.argv.push("additional arg");
         expect(get_user_input())
-            .to.include.ordered.members(["route", "stop", "direction"])
+            .to.include.ordered.members(["route", "stop", 1])
             .and.to.have.lengthOf(3);
 
         // cleanup
         process.argv = prev_process_argv;
+    });
+});
+
+describe("get_direction_number", () => {
+    it("should return undefined for non-directions and undefined", () => {
+        expect(get_direction_number()).to.be.an("undefined");
+        expect(get_direction_number("not-a-direction")).to.be.an("undefined");
+    });
+
+    it("should work for `${direction}` and `${direction}bound`, lower and uppercase", () => {
+        expect(get_direction_number("north")).to.be.equal(4);
+        expect(get_direction_number("nOrTH")).to.be.equal(4);
+        expect(get_direction_number("northbound")).to.be.equal(4);
+        expect(get_direction_number("northBOUND")).to.be.equal(4);
+    });
+
+    it("should return the correct numbers for each direction", () => {
+        expect(get_direction_number("north")).to.be.equal(4);
+        expect(get_direction_number("west")).to.be.equal(3);
+        expect(get_direction_number("east")).to.be.equal(2);
+        expect(get_direction_number("south")).to.be.equal(1);
     });
 });
 

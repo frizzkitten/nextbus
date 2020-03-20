@@ -22,13 +22,19 @@ async function get_time_until_bus() {
         try {
             var route_number = await get_route_number(route);
         } catch (error) {
-            console.log("error: ", error);
             return reject("Invalid route name.");
         }
 
         console.log("route_number: ", route_number);
 
-        // TODO: get the stop id (value)
+        // get the stop id (value)
+        try {
+            var stop_id = await get_stop_id();
+        } catch (error) {
+            return reject("Invalid stop name.");
+        }
+
+        console.log("stop id: ", stop_id);
 
         // TODO: get the departures leaving from that stop
 
@@ -44,7 +50,38 @@ function get_user_input() {
     if (command_line_args.length < 3)
         throw `Not enough arguments. Usage: node nextbus.js "BUS ROUTE" "BUS STOP NAME" "DIRECTION"`;
 
-    return command_line_args.slice(0, 3);
+    let [route, stop, direction] = command_line_args;
+
+    // turn the direction into the number that the APIs will expect
+    const direction_number = get_direction_number(direction);
+    if (!direction_number)
+        throw `Invalid direction. Should be "north" "east" "south" or "west"`;
+
+    return [route, stop, direction_number];
+}
+
+// gets the number that the api uses to identify directions
+function get_direction_number(direction) {
+    if (!direction) return undefined;
+
+    const d = direction.toLowerCase();
+
+    switch (d) {
+        case "north":
+        case "northbound":
+            return 4;
+        case "west":
+        case "westbound":
+            return 3;
+        case "east":
+        case "eastbound":
+            return 2;
+        case "south":
+        case "southbound":
+            return 1;
+        default:
+            return undefined;
+    }
 }
 
 // takes in the name of a route and returns its id
@@ -74,6 +111,10 @@ async function get_route_number(route_string) {
         // return the route number
         return resolve(route.Route);
     });
+}
+
+async function get_stop_id(route_number, direction) {
+    return undefined;
 }
 
 // TODO: takes in a bus departure object and returns the amount of time
@@ -107,5 +148,6 @@ function get_minutes_remaining() {
 module.exports = {
     get_time_until_bus,
     get_user_input,
+    get_direction_number,
     get_route_number
 };
