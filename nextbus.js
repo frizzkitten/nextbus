@@ -178,5 +178,6 @@ module.exports = {
     get_time_until_bus,
     get_user_input,
     get_direction_number,
-    get_route_number
+    get_route_number,
+    get_stop_id
 };

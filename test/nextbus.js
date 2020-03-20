@@ -8,7 +8,8 @@ const {
     get_time_until_bus,
     get_user_input,
     get_direction_number,
-    get_route_number
+    get_route_number,
+    get_stop_id
 } = require("../nextbus");
 
 const DEFAULT_ARGV = [
@@ -107,5 +108,35 @@ describe("get_route_number", () => {
         return expect(get_route_number("METRO Blue Line")).to.eventually.equal(
             "901"
         );
+    });
+});
+
+describe("get_stop_id", () => {
+    it("should throw an error if there is no route input", () => {
+        return expect(get_stop_id()).to.be.rejectedWith(
+            "No route given to get_stop_id."
+        );
+    });
+    it("should throw an error if there is no stop input", () => {
+        return expect(get_stop_id("5")).to.be.rejectedWith(
+            "No stop given to get_stop_id."
+        );
+    });
+    it("should throw an error if there is no direction input", () => {
+        return expect(get_stop_id("5", "Target")).to.be.rejectedWith(
+            "No direction given to get_stop_id."
+        );
+    });
+
+    it("should throw an error if the stop does not exist", () => {
+        return expect(get_stop_id("901", "Invalid Stop", 1)).to.be.rejectedWith(
+            "That stop does not exist."
+        );
+    });
+
+    it("should return the correct route number given valid input", () => {
+        return expect(
+            get_stop_id("901", "Target Field Station Platform 1", 1)
+        ).to.eventually.equal("TF12");
     });
 });
