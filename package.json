@@ -1,21 +1,21 @@
 {
-  "name": "target",
-  "version": "1.0.0",
-  "description": "Gets the amount of time until the next bus comes.",
-  "main": "nextbus.js",
-  "directories": {
-    "test": "test"
-  },
-  "dependencies": {
-    "axios": "^0.19.2",
-    "chai": "^4.2.0"
-  },
-  "devDependencies": {
-    "mocha": "^7.1.1"
-  },
-  "scripts": {
-    "test": "mocha"
-  },
-  "author": "Austin Meyer",
-  "license": "ISC"
+    "name": "target",
+    "version": "1.0.0",
+    "description": "Gets the amount of time until the next bus comes.",
+    "main": "nextbus.js",
+    "directories": {
+        "test": "test"
+    },
+    "dependencies": {
+        "axios": "^0.19.2",
+        "chai": "^4.2.0"
+    },
+    "devDependencies": {
+        "mocha": "^7.1.1"
+    },
+    "scripts": {
+        "test": "mocha"
+    },
+    "author": "Austin Meyer",
+    "license": "ISC"
 }
