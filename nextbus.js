@@ -230,5 +230,6 @@ module.exports = {
     get_direction_number,
     get_route_number,
     get_stop_id,
-    get_next_departure
+    get_next_departure,
+    get_minutes_remaining
 };

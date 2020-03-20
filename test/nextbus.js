@@ -10,7 +10,8 @@ const {
     get_direction_number,
     get_route_number,
     get_stop_id,
-    get_next_departure
+    get_next_departure,
+    get_minutes_remaining
 } = require("../nextbus");
 
 const DEFAULT_ARGV = [
@@ -157,5 +158,32 @@ describe("get_next_departure", () => {
         return expect(get_next_departure("5", "TF12")).to.be.rejectedWith(
             "No direction given to get_next_departure."
         );
+    });
+});
+
+describe("get_minutes_remaining", () => {
+    it("should throw an error for invalid departure objects", () => {
+        expect(get_minutes_remaining).to.throw("Invalid departure object.");
+        expect(() => get_minutes_remaining(10)).to.throw(
+            "Invalid departure object."
+        );
+        expect(() => get_minutes_remaining({})).to.throw(
+            "Invalid departure object."
+        );
+        expect(() => get_minutes_remaining({ DepartureTime: "34r" })).to.throw(
+            "Invalid departure object."
+        );
+    });
+
+    it("should return the correct number of minutes with valid args", () => {
+        let date = new Date();
+        date.setMinutes(date.getMinutes() + 26);
+        const millis = date.getTime();
+
+        expect(
+            get_minutes_remaining({
+                DepartureTime: `/Date(${millis}-0500)/`
+            })
+        ).to.be.equal(26);
     });
 });
