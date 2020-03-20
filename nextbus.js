@@ -1,5 +1,7 @@
 const axios = require("axios");
 
+const nextrip_url = "http://svc.metrotransit.org/NexTrip";
+
 // get and then print the number of minutes until the next bus
 get_time_until_bus()
     .then(minutes => {
@@ -29,7 +31,7 @@ async function get_time_until_bus() {
 
         // get the stop id (value)
         try {
-            var stop_id = await get_stop_id();
+            var stop_id = await get_stop_id(route_number, stop, direction);
         } catch (error) {
             return reject("Invalid stop name.");
         }
@@ -91,9 +93,7 @@ async function get_route_number(route_string) {
 
         // get a list of all the routes
         try {
-            const response = await axios.get(
-                "http://svc.metrotransit.org/NexTrip/Routes"
-            );
+            const response = await axios.get(`${nextrip_url}/Routes`);
             var routes = response.data;
         } catch (error) {
             return reject(error);
@@ -113,8 +113,37 @@ async function get_route_number(route_string) {
     });
 }
 
-async function get_stop_id(route_number, direction) {
-    return undefined;
+// takes route number and stop name and number direction and returns the stop id
+async function get_stop_id(route_number, stop, direction) {
+    return new Promise(async (resolve, reject) => {
+        if (!route_number) return reject("No route given to get_stop_id.");
+        if (!stop) return reject("No stop given to get_stop_id.");
+        if (!direction) return reject("No direction given to get_stop_id.");
+
+        // get a list of all the stops
+        try {
+            const response = await axios.get(
+                `${nextrip_url}/Stops/${route_number}/${direction}`
+            );
+            var stops = response.data;
+        } catch (error) {
+            console.log("ERROR GETTING STOP ID: ", error);
+            return reject(error);
+        }
+
+        // find the stop with the given name
+        const stop_lowercase = stop.toLowerCase();
+        const found_stop = stops.find(stop =>
+            stop.Text.toLowerCase().includes(stop_lowercase)
+        );
+
+        // ensure the stop and stop value exist
+        if (!found_stop || !found_stop.Value)
+            return reject("That stop does not exist.");
+
+        // return the stop value
+        return resolve(found_stop.Value);
+    });
 }
 
 // TODO: takes in a bus departure object and returns the amount of time
