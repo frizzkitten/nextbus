@@ -17,16 +17,16 @@ async function get_time_until_bus() {
         } catch (error) {
             return reject(error);
         }
-        console.log("route:", route);
 
-        // get the route id of the wanted route
-        // try {
-        //   const route_id = await get_route_id(route);
-        //   console.log("route_id: ", route_id);
-        // } catch (error) {
-        //   console.log("error: ", error);
-        //   return reject("Invalid route name.");
-        // }
+        // get the route number of the wanted route
+        try {
+            var route_number = await get_route_number(route);
+        } catch (error) {
+            console.log("error: ", error);
+            return reject("Invalid route name.");
+        }
+
+        console.log("route_number: ", route_number);
 
         // TODO: get the stop id (value)
 
@@ -48,19 +48,30 @@ function get_user_input() {
     return command_line_args.slice(0, 3);
 }
 
-// TODO: takes in the name of a route and returns its id
-async function get_route_id(route_string) {
+// takes in the name of a route and returns its id
+async function get_route_number(route_string) {
     return new Promise(async (resolve, reject) => {
+        // get a list of all the routes
         try {
-            var routes = await axios.get(
+            const response = await axios.get(
                 "http://svc.metrotransit.org/NexTrip/Routes"
             );
+            var routes = response.data;
         } catch (error) {
             return reject(error);
         }
 
-        console.log("routes: ", routes);
-        return resolve("jangus");
+        // find the route with the given name
+        const route_string_lowercase = route_string.toLowerCase();
+        const route = routes.find(route =>
+            route.Description.toLowerCase().includes(route_string_lowercase)
+        );
+
+        // ensure the route and route number exist
+        if (!route || !route.Route) return reject("That route does not exist.");
+
+        // return the route number
+        return resolve(route.Route);
     });
 }
 
