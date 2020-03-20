@@ -38,7 +38,6 @@ async function get_time_until_bus() {
 
 // returns the first three user arguments
 function get_user_input() {
-    console.log("process.argv: ", process.argv);
     // get the command line arguments
     const command_line_args = process.argv.slice(2);
     // ensure there are three of them - bus route, stop name, and direction
@@ -51,6 +50,8 @@ function get_user_input() {
 // takes in the name of a route and returns its id
 async function get_route_number(route_string) {
     return new Promise(async (resolve, reject) => {
+        if (!route_string) return reject("No route given.");
+
         // get a list of all the routes
         try {
             const response = await axios.get(
@@ -105,5 +106,6 @@ function get_minutes_remaining() {
 
 module.exports = {
     get_time_until_bus,
-    get_user_input
+    get_user_input,
+    get_route_number
 };

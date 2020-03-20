@@ -1,6 +1,14 @@
-const { expect } = require("chai");
+// require and set up testing libraries
+let chai = require("chai");
+const chai_as_promised = require("chai-as-promised");
+chai.use(chai_as_promised);
+const { expect } = chai;
 
-const { get_time_until_bus, get_user_input } = require("../nextbus");
+const {
+    get_time_until_bus,
+    get_user_input,
+    get_route_number
+} = require("../nextbus");
 
 const DEFAULT_ARGV = [
     "/Users/username/.nvm/versions/node/v10.15.1/bin/node",
@@ -48,4 +56,14 @@ describe("get_user_input", () => {
         // cleanup
         process.argv = prev_process_argv;
     });
+});
+
+describe("get_route_number", () => {
+    it("should throw an error if there is no route input", () => {
+        return expect(get_route_number()).to.be.rejectedWith("No route given.");
+    });
+
+    // it("should throw an error if the route does not exist");
+    //
+    // it("should return the correct route number given valid input");
 });
