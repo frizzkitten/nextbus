@@ -9,7 +9,8 @@ const {
     get_user_input,
     get_direction_number,
     get_route_number,
-    get_stop_id
+    get_stop_id,
+    get_next_departure
 } = require("../nextbus");
 
 const DEFAULT_ARGV = [
@@ -138,5 +139,23 @@ describe("get_stop_id", () => {
         return expect(
             get_stop_id("901", "Target Field Station Platform 1", 1)
         ).to.eventually.equal("TF12");
+    });
+});
+
+describe("get_next_departure", () => {
+    it("should throw an error if there is no route input", () => {
+        return expect(get_next_departure()).to.be.rejectedWith(
+            "No route given to get_next_departure."
+        );
+    });
+    it("should throw an error if there is no stop input", () => {
+        return expect(get_next_departure("5")).to.be.rejectedWith(
+            "No stop_id given to get_next_departure."
+        );
+    });
+    it("should throw an error if there is no direction input", () => {
+        return expect(get_next_departure("5", "TF12")).to.be.rejectedWith(
+            "No direction given to get_next_departure."
+        );
     });
 });

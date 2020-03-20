@@ -4,10 +4,13 @@ const nextrip_url = "http://svc.metrotransit.org/NexTrip";
 
 // get and then print the number of minutes until the next bus
 get_time_until_bus()
-    .then(minutes => {
-        console.log(`${minutes} Minutes`);
+    .then(time_left => {
+        console.log(time_left);
     })
     .catch(error => {
+        // do nothing if there aren't any departures left today
+        if (error === "No departures.") return;
+
         console.log(error);
     });
 
@@ -27,8 +30,6 @@ async function get_time_until_bus() {
             return reject("Invalid route name.");
         }
 
-        console.log("route_number: ", route_number);
-
         // get the stop id (value)
         try {
             var stop_id = await get_stop_id(route_number, stop, direction);
@@ -36,11 +37,25 @@ async function get_time_until_bus() {
             return reject("Invalid stop name.");
         }
 
-        console.log("stop id: ", stop_id);
+        // get the next departure leaving from that stop
+        try {
+            var next_departure = await get_next_departure(
+                route_number,
+                stop_id,
+                direction
+            );
+        } catch (error) {
+            return reject("No departures.");
+        }
 
-        // TODO: get the departures leaving from that stop
+        // get the amount of time until the next departure
+        try {
+            var minutes_remaining = get_minutes_remaining(next_departure);
+        } catch (error) {
+            return reject("Invalid departure.");
+        }
 
-        // TODO: get the amount of time until the next departure
+        return resolve(minutes_remaining + " Minutes");
     });
 }
 
@@ -122,9 +137,8 @@ async function get_stop_id(route_number, stop, direction) {
 
         // get a list of all the stops
         try {
-            const response = await axios.get(
-                `${nextrip_url}/Stops/${route_number}/${direction}`
-            );
+            const url = `${nextrip_url}/Stops/${route_number}/${direction}`;
+            const response = await axios.get(url);
             var stops = response.data;
         } catch (error) {
             console.log("ERROR GETTING STOP ID: ", error);
@@ -146,38 +160,75 @@ async function get_stop_id(route_number, stop, direction) {
     });
 }
 
-// TODO: takes in a bus departure object and returns the amount of time
+// returns the departure object for the next possible departure OR throws an error
+// if there are no more departures
+async function get_next_departure(route_number, stop_id, direction) {
+    return new Promise(async (resolve, reject) => {
+        if (!route_number)
+            return reject("No route given to get_next_departure.");
+        if (!stop_id) return reject("No stop_id given to get_next_departure.");
+        if (!direction)
+            return reject("No direction given to get_next_departure.");
+
+        try {
+            const url = `${nextrip_url}/${route_number}/${direction}/${stop_id}`;
+            const response = await axios.get(url);
+            var departures = response.data;
+        } catch (error) {
+            return reject(error);
+        }
+
+        if (departures.length > 0) return resolve(departures[0]);
+        else return reject("No departures.");
+    });
+}
+
+// takes in a bus departure object and returns the amount of time
 // before that bus leaves
-function get_minutes_remaining() {
-    return 0;
+function get_minutes_remaining(departure) {
+    // get the timestamp in milliseconds for when the bus leaves
+    try {
+        var millis = parseInt(departure.DepartureTime.substring(6, 19), 10);
+        if (isNaN(millis)) throw "millis is NaN";
+    } catch (error) {
+        throw "Invalid departure object.";
+    }
+
+    // get the number of milliseconds until the bus leaves
+    const now = new Date();
+    const remaining_millis = millis - now.getTime();
+
+    // return the number of milliseconds left converted into minutes
+    return Math.round(remaining_millis / 60000);
 }
 
 // axios
-//   .get("http://svc.metrotransit.org/NexTrip/903/4/CGTR")
-//   .then(response => {
-//     console.log("response.data: ", response.data);
-//     const departures = response.data;
-//     departures.forEach(d => {
-//       // get the timestamp in milliseconds for when the bus leaves
-//       const millis = parseInt(d.DepartureTime.substring(6, 19), 10);
-//       // get the number of milliseconds until the bus leaves
-//       const now = new Date();
-//       const remaining_millis = millis - now.getTime();
+//     .get("http://svc.metrotransit.org/NexTrip/903/4/CGTR")
+//     .then(response => {
+//         console.log("response.data: ", response.data);
+//         const departures = response.data;
+//         departures.forEach(d => {
+//             // get the timestamp in milliseconds for when the bus leaves
+//             const millis = parseInt(d.DepartureTime.substring(6, 19), 10);
+//             // get the number of milliseconds until the bus leaves
+//             const now = new Date();
+//             const remaining_millis = millis - now.getTime();
 //
-//       // return the number of milliseconds left converted into minutes
-//       console.log("minutes left: ", remaining_millis / 60000);
+//             // return the number of milliseconds left converted into minutes
+//             console.log("minutes left: ", remaining_millis / 60000);
 //
-//       console.log("");
+//             console.log("");
+//         });
+//     })
+//     .catch(error => {
+//         console.log("error: ", error);
 //     });
-//   })
-//   .catch(error => {
-//     console.log("error: ", error);
-//   });
 
 module.exports = {
     get_time_until_bus,
     get_user_input,
     get_direction_number,
     get_route_number,
-    get_stop_id
+    get_stop_id,
+    get_next_departure
 };
