@@ -63,7 +63,15 @@ describe("get_route_number", () => {
         return expect(get_route_number()).to.be.rejectedWith("No route given.");
     });
 
-    // it("should throw an error if the route does not exist");
-    //
-    // it("should return the correct route number given valid input");
+    it("should throw an error if the route does not exist", () => {
+        return expect(get_route_number("Not a route")).to.be.rejectedWith(
+            "That route does not exist."
+        );
+    });
+
+    it("should return the correct route number given valid input", () => {
+        return expect(get_route_number("METRO Blue Line")).to.eventually.equal(
+            "901"
+        );
+    });
 });
