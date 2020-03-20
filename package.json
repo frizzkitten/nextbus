@@ -1,5 +1,5 @@
 {
-    "name": "target",
+    "name": "nextbus",
     "version": "1.0.0",
     "description": "Gets the amount of time until the next bus comes.",
     "main": "nextbus.js",
