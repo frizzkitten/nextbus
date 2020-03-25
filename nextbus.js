@@ -14,6 +14,8 @@ get_time_until_bus()
         console.log(error);
     });
 
+// main function that takes in command line arguments and
+// returns the time until the next bus
 async function get_time_until_bus() {
     return new Promise(async (resolve, reject) => {
         // extract the info given by the user
@@ -201,28 +203,6 @@ function get_minutes_remaining(departure) {
     // return the number of milliseconds left converted into minutes
     return Math.round(remaining_millis / 60000);
 }
-
-// axios
-//     .get("http://svc.metrotransit.org/NexTrip/903/4/CGTR")
-//     .then(response => {
-//         console.log("response.data: ", response.data);
-//         const departures = response.data;
-//         departures.forEach(d => {
-//             // get the timestamp in milliseconds for when the bus leaves
-//             const millis = parseInt(d.DepartureTime.substring(6, 19), 10);
-//             // get the number of milliseconds until the bus leaves
-//             const now = new Date();
-//             const remaining_millis = millis - now.getTime();
-//
-//             // return the number of milliseconds left converted into minutes
-//             console.log("minutes left: ", remaining_millis / 60000);
-//
-//             console.log("");
-//         });
-//     })
-//     .catch(error => {
-//         console.log("error: ", error);
-//     });
 
 module.exports = {
     get_time_until_bus,
